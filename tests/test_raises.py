@@ -96,7 +96,7 @@ def test_pytest_mark_raises_unexpected_exception(testdir):
         [
             '*::test_pytest_mark_raises_unexpected_exception FAILED*',
             # pylint: disable=line-too-long
-            "*ExpectedException: Expected exception of type <class '*SomeException'>, but got exception of type <class '*AnotherException'> with message: the message",
+            "*Expected exception of type <class '*SomeException'>, but got exception of type <class '*AnotherException'> with message: the message",
         ],
         1
     )
@@ -204,7 +204,7 @@ def test_pytest_mark_raises_unexpected_match(testdir):
         """,
         [
             '*::test_pytest_mark_raises_unexpected_match FAILED*',
-            '*ExpectedMessage: "^middle$" does not match raised message "In The Middle Of The Road"'
+            '*"^middle$" does not match raised message "In The Middle Of The Road"'
         ],
         1
     )
@@ -274,7 +274,7 @@ def test_pytest_mark_raises_parametrize(testdir):
             '*::test_mark_raises*None1* FAILED*',
             '*::test_mark_raises*error7* PASSED*',
             '*::test_mark_raises*error8* FAILED*',
-            '*ExpectedMessage: "other message" not in "the message"',
+            '*"other message" not in "the message"',
         ],
         1
     )
@@ -560,7 +560,7 @@ def test_pytest_mark_setup_raises_unexpected_match(testdir):
         """,
         [
             '*::test_pytest_mark_setup_raises_unexpected_match FAILED*',
-            '*ExpectedMessage: "^middle$" does not match raised message "In The Middle Of The Road"'
+            '*"^middle$" does not match raised message "In The Middle Of The Road"'
         ],
         1,
         conftest="""
