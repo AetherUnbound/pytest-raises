@@ -6,4 +6,6 @@ build:
 
 test: build
 	docker run --rm $(IS_TTY) pytest-raises:dev py.test --cov-report term-missing --cov
+
+lint: build
 	docker run --rm $(IS_TTY) pytest-raises:dev sh -c /src/pytest-raises/pylint.sh
