@@ -15,4 +15,4 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
       - name: Test
-        run: make test
+        run: make test IS_TTY=''
