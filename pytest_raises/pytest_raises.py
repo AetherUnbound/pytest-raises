@@ -72,12 +72,12 @@ def _pytest_fail_by_mark_or_set_excinfo(item, outcome, marker_name, ExceptionCla
     if marker_name == 'setup_raises':
         # In the later stage when `fail` is called, it is nice to "simulate" an
         # exception by putting the expected exception class's name as a prefix.
-        failure_message = '{}: {}'.format(ExceptionClass.__name__, failure_message)
+        failure_message = f'{ExceptionClass.__name__}: {failure_message}'
         item.add_marker(pytest.mark.setup_raises_expected_exc_or_message_not_found(failure_message))
     else:  # marker_name == 'raises'
         # Avoid "while handling exception another exception occurred" scenarios.
         if issubclass(ExceptionClass, PytestRaisesUsageError):
-            failure_message = '{}: {}'.format(ExceptionClass.__name__, failure_message)
+            failure_message = f"{ExceptionClass.__name__}: {failure_message}"
             pytest.fail(failure_message, pytrace=False)
         else:
             try:
@@ -206,17 +206,13 @@ def _pytest_raises_validation(item, outcome, marker_name):
         exception = raises_marker.kwargs.get('exception', Exception)
         try:
             if not issubclass(exception, BaseException):
-                failure_message = '@pytest.mark.{0}: supplied `exception={1}` is not a subclass of `BaseException`.'.format(
-                    marker_name, exception
-                )
+                failure_message = f'@pytest.mark.{marker_name}: supplied `exception={exception}` is not a subclass of `BaseException`.'
                 _pytest_fail_by_mark_or_set_excinfo(
                     item, outcome, marker_name, PytestRaisesUsageError, failure_message, None
                 )
                 return
         except TypeError:
-            failure_message = '@pytest.mark.{}: supplied `exception` argument must be a Class, e.g., `exception=RuntimeError`.'.format(
-                marker_name
-            )
+            failure_message = f'@pytest.mark.{marker_name}: supplied `exception` argument must be a Class, e.g., `exception=RuntimeError`.'
             _pytest_fail_by_mark_or_set_excinfo(
                 item, outcome, marker_name, PytestRaisesUsageError, failure_message, None
             )
@@ -228,9 +224,7 @@ def _pytest_raises_validation(item, outcome, marker_name):
 
         # Only `message` or `match` should be supplied at a time, not both.
         if message and match_pattern:
-            failure_message = '@pytest.mark.{}: only `message="{}"` *OR* `match="{}"` allowed, not both.'.format(
-                marker_name, message, match_pattern
-            )
+            failure_message = f'@pytest.mark.{marker_name}: only `message="{message}"` *OR* `match="{match_pattern}"` allowed, not both.'
             _pytest_fail_by_mark_or_set_excinfo(
                 item, outcome, marker_name, PytestRaisesUsageError, failure_message, None
             )
@@ -250,25 +244,24 @@ def _pytest_raises_validation(item, outcome, marker_name):
             failure_message = None
             if message is not None:
                 if message not in raised_message:
-                    failure_message = '"{}" not in "{}"'.format(message, raised_message)
+                    failure_message = f'"{message}" not in "{raised_message}"'
             elif match_pattern is not None:
                 if not re.match(match_pattern, raised_message, match_flags):
-                    failure_message = '"{}" does not match raised message "{}"'.format(match_pattern, raised_message)
+                    failure_message = f'"{match_pattern}" does not match raised message "{raised_message}"'
             if failure_message:
                 _pytest_fail_by_mark_or_set_excinfo(
                     item, outcome, marker_name, ExpectedMessage, failure_message, traceback
                 )
         # Case 2: test raised exception, but it was of an unexpected type.
         elif raised_exception:
-            failure_message = 'Expected exception of type {}, but got exception of type {} with message: {}'.format(
-                exception, type(raised_exception), str(raised_exception)
-            )
+            failure_message = (f'Expected exception of type {exception}, but got exception of type '
+                               f'{type(raised_exception)} with message: {str(raised_exception)}')
             _pytest_fail_by_mark_or_set_excinfo(
                 item, outcome, marker_name, ExpectedException, failure_message, traceback
             )
         # Case 3: test did _not_ raise exception, but was expected to.
         else:
-            failure_message = 'Expected exception {}, but it did not raise'.format(exception)
+            failure_message = f'Expected exception {exception}, but it did not raise'
             _pytest_fail_by_mark_or_set_excinfo(
                 item, outcome, marker_name, ExpectedException, failure_message, traceback
             )

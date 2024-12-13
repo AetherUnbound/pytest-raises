@@ -2,6 +2,7 @@ import contextlib
 import os
 import re
 import subprocess
+from pathlib import Path
 
 from setuptools import setup
 from setuptools.command.sdist import sdist
@@ -25,14 +26,14 @@ def _get_git_branches_for_this_commit():
     return [branch.strip() for branch in split]
 
 def _is_on_releasable_branch(branches):
-    return any([branch == 'origin/master' or branch.startswith('origin/hotfix') for branch in branches])
+    return any(branch == 'origin/master' or branch.startswith('origin/hotfix') for branch in branches)
 
 def _git_to_version(git):
     match = re.match(r'(?P<tag>[\d\.]+)-(?P<offset>[\d]+)-(?P<sha>\w{8})', git)
     if not match:
         version = git
     else:
-        version = "{tag}.post0.dev{offset}".format(**match.groupdict())
+        version = "{tag}.post0.dev{offset}".format(**match.groupdict())  # pylint: disable=consider-using-f-string
     return version
 
 def _get_version_from_git():
@@ -40,17 +41,17 @@ def _get_version_from_git():
     git_branches = _get_git_branches_for_this_commit()
     version = _git_to_version(git_description) if git_description else None
     if git_branches and not _is_on_releasable_branch(git_branches):
-        print("Forcing version to 0.0.1 because this commit is on branches {} and not a whitelisted branch".format(git_branches))
+        print(f"Forcing version to 0.0.1 because this commit is on branches {git_branches} and not a whitelisted branch")
         version = '0.0.1'
     return version
 
 VERSION_REGEX = re.compile(r'__version__ = "(?P<version>[\w\.]+)"')
 def _get_version_from_file():
-    with open(VERSION_FILE, 'r') as f:
+    with open(VERSION_FILE, 'r') as f:  # pylint: disable=unspecified-encoding
         content = f.read()
     match = VERSION_REGEX.match(content)
     if not match:
-        raise Exception("Failed to pull version out of '{}'".format(content))
+        raise Exception(f"Failed to pull version out of '{content}'")
     version = match.group(1)
     return version
 
@@ -88,7 +89,7 @@ def get_data_files():
             data_files.append((os.path.join(PROJECT, root), [os.path.join(root, f) for f in files]))
     return data_files
 
-class CustomSDistCommand(sdist): # pylint: disable=no-init, unused-variable
+class CustomSDistCommand(sdist): # pylint: disable=unused-variable
     def run(self):
         with write_version():
             sdist.run(self)
@@ -99,7 +100,7 @@ def main():
         version=get_version(),
         description="An implementation of pytest.raises as a pytest.mark fixture",
         url="https://github.com/Authentise/pytest-raises",
-        long_description=open('README.md').read(),
+        long_description=Path('README.md').read_text(),  # pylint: disable=unspecified-encoding
         long_description_content_type='text/markdown',
         author="Authentise, Inc.",
         author_email="engineering@authentise.com",
